@@ -32,7 +32,7 @@ No DI to wire all things together. The way used here is based on good old Proper
 But let´s start from the beginning.
 
 ## Start the Servlet-Container (Kotlin)
-The class ``BasicTestUIRunner``` will ramp up the Container and 
+The class ```BasicTestUIRunner``` will ramp up the Container and 
 holds the Servlet- and UI- class as inner static classes.
 
 Here all the basic stuff is done. The start will init. a ServletContainer at port **8080**.

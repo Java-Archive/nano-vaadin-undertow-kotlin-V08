@@ -40,9 +40,8 @@ class BasicTestUI : Composite() {
   }
 
   companion object {
+    // read http://vaadin.com/testing for more infos
     @JvmField val BUTTON_ID = buttonID().apply(BasicTestUI::class.java, "buttonID")
     @JvmField val LABEL_ID = buttonID().apply(BasicTestUI::class.java, "labelID")
   }
-
-
 }

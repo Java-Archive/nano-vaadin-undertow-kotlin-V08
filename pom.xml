@@ -93,7 +93,6 @@
 
     <!--Vaadin-->
     <vaadin.version>8.5.1</vaadin.version>
-    <undertow.version>1.4.20.Final</undertow.version>
     <meecrowave.version>1.2.3</meecrowave.version>
 
     <!--Kotlin-->
@@ -170,18 +169,6 @@
 
     <!--Infrastructure-->
     <dependency>
-      <groupId>io.undertow</groupId>
-      <artifactId>undertow-core</artifactId>
-      <version>${undertow.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>io.undertow</groupId>
-      <artifactId>undertow-servlet</artifactId>
-      <version>${undertow.version}</version>
-    </dependency>
-
-    <dependency>
       <groupId>org.apache.meecrowave</groupId>
       <artifactId>meecrowave-core</artifactId>
       <version>${meecrowave.version}</version>
@@ -247,7 +234,18 @@
     <!--For TestUI only-->
     <dependency>
       <groupId>com.vaadin</groupId>
-      <artifactId>vaadin-testbench</artifactId>
+      <artifactId>vaadin-testbench-core</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.seleniumhq.selenium</groupId>
+          <artifactId>selenium-server</artifactId>
+        </exclusion>
+      </exclusions>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-testbench-api</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -256,7 +254,14 @@
       <version>2.6</version>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+    </dependency>
   </dependencies>
 
 
@@ -323,34 +328,34 @@
           </execution>
         </executions>
       </plugin>
-          <plugin>
-            <groupId>com.github.webdriverextensions</groupId>
-            <artifactId>webdriverextensions-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>install-drivers</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <keepDownloadedWebdrivers>true</keepDownloadedWebdrivers>
-              <!--Distributed FS-->
-              <!--<installationDirectory>/Users/andidev/drivers</installationDirectory>-->
-              <installationDirectory>_data/webdrivers</installationDirectory>
-              <drivers>
-                <driver>
-                  <name>chromedriver</name>
-                </driver>
-                <!--<driver>-->
-                <!--<name>operadriver</name>-->
-                <!--</driver>-->
-                <!--<driver>-->
-                <!--<name>geckodriver</name>-->
-                <!--</driver>-->
-              </drivers>
-            </configuration>
-          </plugin>
+      <plugin>
+        <groupId>com.github.webdriverextensions</groupId>
+        <artifactId>webdriverextensions-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>install-drivers</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <keepDownloadedWebdrivers>true</keepDownloadedWebdrivers>
+          <!--Distributed FS-->
+          <!--<installationDirectory>/Users/andidev/drivers</installationDirectory>-->
+          <installationDirectory>_data/webdrivers</installationDirectory>
+          <drivers>
+            <driver>
+              <name>chromedriver</name>
+            </driver>
+            <!--<driver>-->
+            <!--<name>operadriver</name>-->
+            <!--</driver>-->
+            <!--<driver>-->
+            <!--<name>geckodriver</name>-->
+            <!--</driver>-->
+          </drivers>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>

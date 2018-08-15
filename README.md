@@ -82,6 +82,38 @@ The UI itself will hold the graphical elements.
 
 After this you can start the app invoking the main-method.
 
+## The UI itself
+The UI itself is quite easy. 
+There is only a button you can click.
+For every click, the counter will be increased.
+
+```kotlin
+class BasicTestUI : Composite() {
+
+  private val button = Button()
+  private val label = Label()
+
+  private var counter = 0
+
+  init {
+    label.id = LABEL_ID
+    label.value = counter.toString()
+
+    button.id = BUTTON_ID
+    button.caption = BUTTON_ID
+    button.addClickListener { e -> label.value = (++counter).toString() }
+
+    compositionRoot = VerticalLayout(button, label)
+  }
+
+  companion object {
+    // read http://vaadin.com/testing for more infos
+    @JvmField val BUTTON_ID = buttonID().apply(BasicTestUI::class.java, "buttonID")
+    @JvmField val LABEL_ID = buttonID().apply(BasicTestUI::class.java, "labelID")
+  }
+}
+```
+
 ## Kotlin, Vaadin and TDD
 For testing the Vaadin app, the Open Source project Testbench-NG is used.
 This is a jUnit5 / Webdriver - manager AddOn for the Selenium and Testbench projects.

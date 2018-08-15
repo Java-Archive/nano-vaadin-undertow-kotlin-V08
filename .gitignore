@@ -1,6 +1,6 @@
 *.iml
 .idea/*
-
+_data/webdrivers/*
 
 # Created by .ignore support plugin (hsz.mobi)
 ### JetBrains template
@@ -111,3 +111,4 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+

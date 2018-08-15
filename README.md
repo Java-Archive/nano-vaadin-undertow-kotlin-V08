@@ -16,240 +16,124 @@ there is no time and budget to create a demo project.
 You don´t want to copy paste all small things together.
 Here you will get a Nano-Project that will give you all in a second.
 
-Clone the repo and start editing the class ```MyVaadinApp``` or ```MyVaadinKotlinApp```.
+Clone the repo and start editing the class ```BasicTestUI``` or ```BasicTestUIRunner```.
 Nothing more. 
 
 ## How does it work?
 This project will not use any additional maven plugin or technology.
-Core Java and the Vaadin Dependencies are all that you need to put 
+Core Kotlin and the Vaadin Dependencies are all that you need to put 
 a Vaadin app into a Servlet-container.
 
-Here we are using the plain **undertow** as Servlet-Container.
+Here we are using the plain **meecrowave** as Servlet-Container.
 
 As mentioned before, there is not additional technology involved.
 No DI to wire all things together. The way used here is based on good old Properties.
 
 But let´s start from the beginning.
 
-## Start the Servlet-Container (Java)
-The class ``NanoVaadinApp``` will ramp up the Container and 
+## Start the Servlet-Container (Kotlin)
+The class ``BasicTestUIRunner``` will ramp up the Container and 
 holds the Servlet- and UI- class as inner static classes.
 
-Here all the basic stuff is done. The start will init. a ServletContainer at port **8899**.
+Here all the basic stuff is done. The start will init. a ServletContainer at port **8080**.
+If you want to use a random port, use ```randomHttpPort()``` instead of ```httpPort = 8080```
 The WebApp will deployed as **ROOT.war**. 
 
+```kotlin
+object BasicTestUIRunner {
 
-```java
-  public static void main(String[] args) throws ServletException {
-    new CoreUIService().startup();
+  @JvmStatic
+  fun main(args: Array<String>) {
+    Meecrowave(object : Meecrowave.Builder() {
+      init {
+        //        randomHttpPort();
+        httpPort = 8080
+        isTomcatScanning = true
+        isTomcatAutoSetup = false
+        isHttp2 = true
+      }
+    })
+        .bake()
+        .await()
   }
 
-  public void startup() throws ServletException {
-    DeploymentInfo servletBuilder
-        = Servlets.deployment()
-                  .setClassLoader(CoreUIService.class.getClassLoader())
-                  .setContextPath("/")
-                  .setDeploymentName("ROOT.war")
-                  .setDefaultEncoding("UTF-8")
-                  .addServlets(
-                      servlet(
-                          CoreServlet.class.getSimpleName(),
-                          CoreServlet.class
-                      ).addMapping("/*")
-                      .setAsyncSupported(true)
-                  );
-
-    final DeploymentManager manager = Servlets
-        .defaultContainer()
-        .addDeployment(servletBuilder);
-    manager.deploy();
-    PathHandler path = path(redirect("/"))
-        .addPrefixPath("/", manager.start());
-    Undertow.builder()
-            .addHttpListener(8899, "0.0.0.0")
-            .setHandler(path)
-            .build()
-            .start();
-  }
+}
 ```
 
 The Servlet itself will only bind the UI Class to the Vaadin Servlet.
 
-
-```java
+```kotlin
   @WebServlet("/*")
-  @VaadinServletConfiguration(productionMode = false, ui = MyUI.class)
-  public static class CoreServlet extends VaadinServlet {
-    //customize Servlet if needed
-  }
+  @VaadinServletConfiguration(productionMode = false, ui = MyUI::class)
+  class MyProjectServlet : VaadinServlet()
 ```
 
 The UI itself will hold the graphical elements. 
 
-```java
-@PreserveOnRefresh
+```kotlin
+  @PreserveOnRefresh
   @Push
-  public static class MyUI extends UI implements HasLogger {
-    @Override
-    protected void init(VaadinRequest request) {
-      setContent(new Label("Hello World"));
+  class MyUI : UI() {
+    override fun init(request: VaadinRequest) {
+      content = BasicTestUI()
     }
   }
 ```
-
 
 After this you can start the app invoking the main-method.
 
+## Kotlin, Vaadin and TDD
+For testing the Vaadin app, the Open Source project Testbench-NG is used.
+This is a jUnit5 / Webdriver - manager AddOn for the Selenium and Testbench projects.
+To read more about it, plase have a look at 
 
-## Now switching to kotlin
+[https://github.com/vaadin-developer/vaadin-testbench-ng](https://github.com/vaadin-developer/vaadin-testbench-ng)
+The lates version of Testbench NG is : 
 
-First you have to make sure the kotlin dependencies (including compiler config) are available.
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.rapidpm/rapidpm-vaadin-testbench-ng/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.rapidpm/rapidpm-vaadin-testbench-ng)
+ 
 
-```xml
-    <!--Adding Kotlin stuff-->
-    <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-stdlib</artifactId>
-      <version>${kotlin-stdlib.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-reflect</artifactId>
-      <version>${kotlin-stdlib.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-test-junit</artifactId>
-      <version>${kotlin-stdlib.version}</version>
-    </dependency>
-```
-
-```xml
-      <plugin>
-        <artifactId>kotlin-maven-plugin</artifactId>
-        <groupId>org.jetbrains.kotlin</groupId>
-        <version>${kotlin-stdlib.version}</version>
-        <executions>
-          <execution>
-            <id>compile</id>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-            <configuration>
-              <sourceDirs>
-                <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
-                <sourceDir>${project.basedir}/src/main/java</sourceDir>
-              </sourceDirs>
-            </configuration>
-          </execution>
-          <execution>
-            <id>test-compile</id>
-            <goals>
-              <goal>test-compile</goal>
-            </goals>
-            <configuration>
-              <sourceDirs>
-                <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
-                <sourceDir>${project.basedir}/src/test/java</sourceDir>
-              </sourceDirs>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.5.1</version>
-        <executions>
-          <!-- Replacing default-compile as it is treated specially by maven -->
-          <execution>
-            <id>default-compile</id>
-            <phase>none</phase>
-          </execution>
-          <!-- Replacing default-testCompile as it is treated specially by maven -->
-          <execution>
-            <id>default-testCompile</id>
-            <phase>none</phase>
-          </execution>
-          <execution>
-            <id>java-compile</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>java-test-compile</id>
-            <phase>test-compile</phase>
-            <goals>
-              <goal>testCompile</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-```
-
-The converted Java into Kotlin code looks like the following.
+The next step is to create a PageObject for the UI.
+This can be done straight forward.
 
 ```kotlin
-class NanoVaadinKotlinApp {
+class BasicTestPageObject(webDriver: WebDriver, containerInfo: ContainerInfo)
+  : AbstractVaadinPageObject(webDriver, containerInfo) {
 
-  @Throws(ServletException::class)
-  fun startup() {
-    val servletBuilder = Servlets.deployment()
-        .setClassLoader(NanoVaadinKotlinApp::class.java.classLoader)
-        .setContextPath("/")
-        .setDeploymentName("ROOT.war")
-        .setDefaultEncoding("UTF-8")
-        .addServlets(
-            servlet(
-                CoreServlet::class.java.simpleName,
-                CoreServlet::class.java
-            ).addMapping("/*")
-                .setAsyncSupported(true)
-        )
-
-    val manager = Servlets
-        .defaultContainer()
-        .addDeployment(servletBuilder)
-    manager.deploy()
-    val path = path(redirect("/"))
-        .addPrefixPath("/", manager.start())
-    Undertow.builder()
-        .addHttpListener(8899, "0.0.0.0")
-        .setHandler(path)
-        .build()
-        .start()
+  fun button(): ButtonElement {
+    return btn().id(BasicTestUI.BUTTON_ID)
   }
 
-  @PreserveOnRefresh
-  @Push
-  class MyUI : UI(), HasLogger {
-    override fun init(request: VaadinRequest) {
-      content = Label("Hello World")
-    }
-  }
-
-  @WebServlet("/*")
-  @VaadinServletConfiguration(productionMode = false, ui = NanoVaadinKotlinApp.MyUI::class)
-  class CoreServlet : VaadinServlet()//customize Servlet if needed
-
-  companion object {
-
-    @JvmStatic
-    fun main(args: Array<String>) {
-      try {
-        MyVaadinApp().startup()
-      } catch (e: ServletException) {
-        e.printStackTrace()
-      }
-
-    }
+  fun counterLabel(): LabelElement {
+    return label().id(BasicTestUI.LABEL_ID)
   }
 }
 ```
 
+Now we can start writing logical tests. One could be 
+
+```kotlin
+@VaadinWebUnitTest
+internal class BasicUnitTest {
+
+  @Test
+  fun test001(pageObject: BasicTestPageObject) {
+    pageObject.loadPage()
+
+    Assertions.assertEquals("0", pageObject.counterLabel().text)
+    pageObject.button().click()
+    Assertions.assertEquals("1", pageObject.counterLabel().text)
+    pageObject.screenshot()
+  }
+}
+```
+
+## Mutation Testing
+This project will give you the basic config for MutationTesting as well.
+Invoke the maven target **pitest:mutationCoverage** to create the report. 
+The report itself will be under **target/pit-reports**
+
+![_data/PiTest_Report_001.png](_data/PiTest_Report_001.png)
 
 
 Happy Coding.

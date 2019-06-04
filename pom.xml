@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.rapidpm</groupId>
     <artifactId>rapidpm-dependencies</artifactId>
-    <version>04.00.16-RPM</version>
+    <version>04.00.17-RPM</version>
   </parent>
 
 
@@ -92,6 +92,7 @@
     <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
     <kotlin-stdlib.version>1.3.21</kotlin-stdlib.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
+    <kotlin.version>1.3.31</kotlin.version>
   </properties>
 
   <repositories>
@@ -161,8 +162,8 @@
     <!--Adding Kotlin stuff-->
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-stdlib</artifactId>
-      <version>${kotlin-stdlib.version}</version>
+      <artifactId>kotlin-stdlib-jdk8</artifactId>
+      <version>${kotlin.version}</version>
     </dependency>
 
     <dependency>
@@ -191,6 +192,12 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-test</artifactId>
+      <version>${kotlin.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -210,7 +217,7 @@
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <manifestEntries>
-                    <Main-Class>org.rapidpm.vaadin.nano.CoreUIService</Main-Class>
+                    <Main-Class>org.rapidpm.vaadin.nano.CoreUIKotlinService</Main-Class>
                   </manifestEntries>
                 </transformer>
               </transformers>
@@ -221,32 +228,25 @@
 
       <plugin>
         <artifactId>kotlin-maven-plugin</artifactId>
+        <configuration>
+          <jvmTarget>1.8</jvmTarget>
+        </configuration>
         <groupId>org.jetbrains.kotlin</groupId>
-        <version>${kotlin-stdlib.version}</version>
+        <version>${kotlin.version}</version>
         <executions>
           <execution>
             <id>compile</id>
+            <phase>compile</phase>
             <goals>
               <goal>compile</goal>
             </goals>
-            <configuration>
-              <sourceDirs>
-                <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
-                <sourceDir>${project.basedir}/src/main/java</sourceDir>
-              </sourceDirs>
-            </configuration>
           </execution>
           <execution>
             <id>test-compile</id>
+            <phase>test-compile</phase>
             <goals>
               <goal>test-compile</goal>
             </goals>
-            <configuration>
-              <sourceDirs>
-                <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
-                <sourceDir>${project.basedir}/src/test/java</sourceDir>
-              </sourceDirs>
-            </configuration>
           </execution>
         </executions>
       </plugin>
